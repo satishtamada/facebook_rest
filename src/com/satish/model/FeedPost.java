@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 public class FeedPost {
 	private int post_id,user_id,likes,width,height;
-	String username,text,image;
+	private String username,text,image;
 	private Timestamp created_at;
 	public FeedPost() {
 		
