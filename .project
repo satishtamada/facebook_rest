@@ -3,6 +3,8 @@
 	<name>facebook_rest</name>
 	<comment></comment>
 	<projects>
+		<project>facebook_rest</project>
+		<project>SampleProject</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

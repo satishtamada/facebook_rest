@@ -3,13 +3,13 @@ package com.satish.model;
 import java.sql.Timestamp;
 
 public class FeedPost {
-	private int post_id,user_id,likes,width,height;
-	private String username,text,image;
+	private int user_id,post_id,likes,width,height;
+	private String username,text,image,profile_image;
 	private Timestamp created_at;
 	public FeedPost() {
 		
 	}
-	public FeedPost(int post_id, int user_id, int likes, String username,String text,
+	public FeedPost(int post_id, int user_id, int likes, String username,String text,String profile_image,
 			String image,int width,int height,Timestamp created_at) {
 		super();
 		this.post_id = post_id;
@@ -21,6 +21,13 @@ public class FeedPost {
 		this.width=width;
 		this.height=height;
 		this.created_at=created_at;
+		this.profile_image=profile_image;
+	}
+	public String getProfile_image() {
+		return profile_image;
+	}
+	public void setProfile_image(String profile_image) {
+		this.profile_image = profile_image;
 	}
 	public int getPost_id() {
 		return post_id;

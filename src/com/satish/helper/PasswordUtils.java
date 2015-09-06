@@ -2,8 +2,10 @@ package com.satish.helper;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+
+import org.apache.tomcat.util.codec.binary.Base64;
+
 import java.security.SecureRandom;
-import org.apache.commons.codec.binary.Base64;
 
 public class PasswordUtils {
     // The higher the number of iterations the more 

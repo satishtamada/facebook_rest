@@ -13,54 +13,100 @@ import javax.ws.rs.core.Response;
 import org.codehaus.jettison.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.satish.core.DatabaseHandler;
 import com.satish.global.Config;
-import com.satish.model.Comment;
+import com.satish.model.Comments;
+import com.satish.model.Likes;
 
 @Path("/post")
 public class PostCommentHandler {
+
 	@Path("/comments")
 	@GET
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response postComment(@QueryParam("post_id") int post_id) {
+	public Response postComments(@QueryParam("post_id") int post_id) {
 
-		JSONObject response = new JSONObject();
-		ArrayList<Comment> comment_list;
+		JsonObject response = new JsonObject();
+		Gson gson=new Gson();
+		ArrayList<Comments> comment_list;
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
 			db.connect();
 			comment_list = db.comment(post_id);
-			
 			// if comment is not null
 			if (comment_list != null) {
-				response.put("success", true);
+				response.addProperty("success", true);
 				// create comment array
-				JSONArray comments = new JSONArray();
+				JsonArray comments = new JsonArray();
+				
 				for (int i = 0; i < comment_list.size(); i++) {
-					Comment c = comment_list.get(i);
+					Comments c = comment_list.get(i);
 					// adding elements to json object
-					JSONObject cObj = new JSONObject();
-					cObj.put("id", c.getId());
-					cObj.put("user_id", c.getCommented_user_id());
-					cObj.put("username", c.getCommented_username());
-					cObj.put("comment", c.getComment());
-					cObj.put("created_at", c.getCreated_at());
+					JsonObject cObj = new JsonObject();
+					cObj.addProperty("id", c.getId());
+					cObj.addProperty("user_id", c.getCommented_user_id());
+					cObj.addProperty("username", c.getCommented_username());
+					cObj.addProperty("comment", c.getComment());
+					cObj.addProperty("created_at",c.getCreated_at().toString());
+					// checking if user not upload his profile image
+					if (c.getProfile_image() == null)
+						cObj.addProperty("profile_image",
+								Config.PROFILE_IAMGE_DEFAULT);
+					else
+						cObj.addProperty("profile_image",
+								Config.PROFILE_IMAGE_URL + c.getProfile_image());
+					//cObj.addProperty("created_at", c.getCreated_at().toString());
 					// adding json object to comment array
-					comments.put(cObj);
+					comments.add(cObj);
 				}
-				response.put("comments", comments);
-			}else {
-				response.put("success", false);
-				JSONObject error = new JSONObject();
-				error.put("code", Config.ERROR_NO_COMMENTS);
-				error.putOpt("message", "no comments on your post");
-				response.put("error", error);
+				response.add("comments", comments);
+			} else {
+				response.addProperty("success", false);
+				JsonObject error = new JsonObject();
+				error.addProperty("code", Config.ERROR_NO_COMMENTS);
+				error.addProperty("message", "no comments on your post");
+				response.addProperty("error", gson.toJson(error));
 
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		return Response.status(200).entity(response.toString()).build();
+	}
+
+	@Path("/likes")
+	@GET
+	@Produces("application/json")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response postLikes(@QueryParam("post_id") int post_id) {
+		JSONObject response = new JSONObject();
+		ArrayList<Likes> likes_list;
+		try {
+			// connecting database
+			DatabaseHandler db = new DatabaseHandler();
+			db.connect();
+			likes_list = db.postLikes(post_id);
+			System.out.println(likes_list.size());
+			if (likes_list != null) {
+				int count=db.countLikes(post_id);
+				response.put("success", true);
+				response.put("likes",count);
+				JSONArray likes = new JSONArray();
+				for (int i = 0; i < likes_list.size(); i++) {
+					Likes l = likes_list.get(i);
+					JSONObject likesObj = new JSONObject();
+					likesObj.put("id", l.getLiked_user_id());
+					likesObj.put("liked by",l.getLiked_by_name());
+					likes.put(likesObj);
+				}
+               response.put("likes by", likes);
+			}
+		} catch (Exception e) {
 		}
 		return Response.status(200).entity(response.toString()).build();
 	}

@@ -2,6 +2,18 @@
     <wb-module deploy-name="facebook_rest">
         <wb-resource deploy-path="/" source-path="/WebContent"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <dependent-module deploy-path="/" handle="org.eclipse.jst.j2ee.componentcore.util.ClasspathDependencies">
+            <dependency-type>consumes</dependency-type>
+        </dependent-module>
+        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/classpath/con/org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-7-openjdk-amd64">
+            <dependency-type>consumes</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="SampleProject.war" deploy-path="/WEB-INF/lib" handle="module:/resource/SampleProject/SampleProject">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/classpath/con/org.eclipse.jdt.launching.JRE_CONTAINER">
+            <dependency-type>consumes</dependency-type>
+        </dependent-module>
         <property name="context-root" value="facebook_rest"/>
         <property name="java-output-path" value="/facebook_rest/build/classes"/>
     </wb-module>

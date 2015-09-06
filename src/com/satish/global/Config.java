@@ -6,5 +6,7 @@ public class Config {
 	public static final int ERROR_VALID_EMAIL_PASSWORD=101;
 	public static final int ERROR_NO_FRIENDS=102;
 	public static final int ERROR_NO_COMMENTS=103;
-	public static final String IMAGE_SOURCE_FILE="http://localhost:8080/facebook_rest/images/";
+	public static final String IMAGE_SOURCE_FILE="http://192.168.0.102:8080/facebook_rest/images/";
+	public static final String PROFILE_IMAGE_URL="http://192.168.0.102:8080/facebook_rest/images/profileImages/";
+	public static final String PROFILE_IAMGE_DEFAULT="http://192.168.0.102:8080/facebook_rest/images/profileImages/profile_selected.jpg";
 }
