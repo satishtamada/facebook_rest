@@ -44,16 +44,18 @@ public class FeedHandler {
 			@FormDataParam("image") InputStream uploadedInputStream,
 			@FormDataParam("image") FormDataContentDisposition fileDetail) {
 		String imageName = "";
+		String uploadedFileLocation = "";
 		int width = 0;
 		int height = 0;
 
 		// if user post a image
 		if (uploadedInputStream != null) {
-
-			String uploadedFileLocation = "/home/satish/Eclipseworkspace/facebook_rest/WebContent/images/"
-					+ new SimpleDateFormat("yyyyMMddhhmmss").format(new Date())
+			imageName = new SimpleDateFormat("yyyyMMddhhmmss")
+					.format(new Date())
 					+ "."
 					+ FilenameUtils.getExtension(fileDetail.getFileName());
+			uploadedFileLocation = "/home/satish/Eclipseworkspace/facebook_rest/WebContent/images/"
+					+ imageName;
 
 			writeToFile(uploadedInputStream, uploadedFileLocation);
 
@@ -65,12 +67,6 @@ public class FeedHandler {
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
-
-			imageName = new SimpleDateFormat("yyyyMMddhhmmss")
-					.format(new Date())
-					+ "."
-					+ FilenameUtils.getExtension(fileDetail.getFileName());
-			System.out.println(uploadedFileLocation);
 
 		}
 
@@ -89,9 +85,9 @@ public class FeedHandler {
 				post.put("id", feedpost.getPost_id());
 				post.put("text", feedpost.getText());
 				post.put("image", feedpost.getImage());
-				if(feedpost.getWidth()!=0){
-				post.put("width", feedpost.getWidth());
-				post.put("height", feedpost.getHeight());
+				if (feedpost.getWidth() != 0) {
+					post.put("width", feedpost.getWidth());
+					post.put("height", feedpost.getHeight());
 				}
 				post.put("created_at", feedpost.getCreated_at());
 				response.put("post", post);

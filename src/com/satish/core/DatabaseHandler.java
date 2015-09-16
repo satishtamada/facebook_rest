@@ -67,7 +67,7 @@ public class DatabaseHandler {
 			preparedStatement.setString(2, email);
 			preparedStatement.setString(3, password_hash);
 			preparedStatement.setString(4, api_key_value);
-			//preparedStatement.setString(5, profileImage);
+			// preparedStatement.setString(5, profileImage);
 			int row = preparedStatement.executeUpdate();
 			System.out.println(row);
 
@@ -87,7 +87,8 @@ public class DatabaseHandler {
 					user.setApi_key(rs.getString("api_key"));
 					user.setId(rs.getInt("id"));
 					user.setCreated_at(rs.getTimestamp("created_at"));
-					//user.setImage(Config.PROFILE_IMAGE_URL+ rs.getString("profile_image"));
+					// user.setImage(Config.PROFILE_IMAGE_URL+
+					// rs.getString("profile_image"));
 
 					return user;
 				} else {
@@ -124,6 +125,7 @@ public class DatabaseHandler {
 					user.setEmail(rs.getString("email"));
 					user.setApi_key(rs.getString("api_key"));
 					user.setId(rs.getInt("id"));
+					user.setCreated_at(rs.getTimestamp("created_at"));
 					return user;
 				} else {
 					return null;
@@ -254,7 +256,7 @@ public class DatabaseHandler {
 					friend_list.add(friend);
 				}
 				return friend_list;
-				
+
 			} else
 				return null;
 		} catch (SQLException e) {
@@ -385,10 +387,11 @@ public class DatabaseHandler {
 	}
 
 	public ArrayList<FeedPost> friendsPosts(int user_id) {
+		System.out.println(user_id);
 
 		try {
 			PreparedStatement preparedStatement = con
-					.prepareStatement("select image,text,name,profile_image,posts.created_at as created_at from posts,users where"
+					.prepareStatement("select image,text,name,profile_image,posts.created_at as created_at,posts.id as post_id from posts,users where"
 							+ " users.id=posts.user_id and user_id in(select u.id as id from users u,friends f where u.id in"
 							+ "(select f.user2_id from friends f,users u where f.user1_id=? and f.user2_id=u.id)"
 							+ "or(select f.user1_id from friends f where f.user2_id=? and f.user1_id=u.id) and ?) order by posts.created_at desc");
@@ -409,7 +412,9 @@ public class DatabaseHandler {
 					friend.setImage(rs.getString("image"));
 					friend.setText(rs.getString("text"));
 					friend.setCreated_at(rs.getTimestamp("created_at"));
-					System.out.println(rs.getString("name")+"  "+rs.getTimestamp("created_at"));
+					friend.setPost_id(rs.getInt("post_id"));
+					System.out.println(rs.getString("name") + "  "
+							+ rs.getTimestamp("created_at"));
 					friendFeedPost.add(friend);
 				}
 				return friendFeedPost;
@@ -470,7 +475,8 @@ public class DatabaseHandler {
 					friend.setUsername(rs.getString("name"));
 					friend.setCreated_at(rs.getTimestamp("created_at"));
 					friend.setProfile_image(rs.getString("profile_image"));
-					System.out.println(rs.getString("image")+"gg");
+					System.out.println(rs.getString("image") + "gg"
+							+ rs.getString("id"));
 					friendFeedPost.add(friend);
 				}
 				return friendFeedPost;
@@ -479,6 +485,61 @@ public class DatabaseHandler {
 		} catch (Exception e) {
 
 		}
+		return null;
+	}
+
+	public ArrayList<Comments> commentCreate(int user1_id, int post_id,
+			String comment) {
+		PreparedStatement preparedStatement=null;
+		try {
+			 preparedStatement = con
+					.prepareStatement("insert into comments(user1_id, post_id, comment) values(?,?,?)");
+			preparedStatement.setInt(1, user1_id);
+			preparedStatement.setInt(2, post_id);
+			preparedStatement.setString(3, comment);
+			int row = preparedStatement.executeUpdate();
+			System.out.println(row);
+
+			if (row > 0) {
+				preparedStatement = con
+						.prepareStatement("select comment from comments where post_id=?");
+				preparedStatement.setInt(1, post_id);
+				ResultSet rs1 = preparedStatement.executeQuery();
+				System.out.println(rs1);
+				if (rs1.next()) {
+					comment_list = new ArrayList<Comments>();
+					preparedStatement = con
+							.prepareStatement("select u.name as username,profile_image,c.id as id,c.user1_id as userid,c.comment as comment,c.created_at as created_at from users u,comments c where  c.post_id=? and c.user1_id=u.id");
+					preparedStatement.setInt(1, post_id);
+
+					ResultSet rs = preparedStatement.executeQuery();
+					// set values for comment model
+					while (rs.next()) {
+						Comments comments = new Comments();
+						comments.setId(rs.getInt("id"));
+						comments.setCommented_username(rs.getString("username"));
+						comments.setCommented_user_id(rs.getInt("userid"));
+						comments.setComment(rs.getString("comment"));
+						comments.setCreated_at(rs.getTimestamp("created_at"));
+						comments.setProfile_image(rs.getString("profile_image"));
+						comment_list.add(comments);
+
+						System.out.println(rs.getString("username") + ","
+								+ rs.getInt("userid") + ","
+								+ rs.getString("comment"));
+					}
+					System.out.println(comment_list);
+					return comment_list;
+				} else
+					return null;
+
+			}else{
+				return null;
+			}
+		} catch (Exception e) {
+
+		}
+		// TODO Auto-generated method stub
 		return null;
 	}
 

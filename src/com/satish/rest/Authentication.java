@@ -173,6 +173,7 @@ public class Authentication {
 				profile.put("email", user.getEmail());
 				profile.put("apikey", user.getApi_key());
 				profile.put("id", user.getId());
+				profile.put("created_at", user.getCreated_at());
 				response.put("profile", profile);
 
 			} else {

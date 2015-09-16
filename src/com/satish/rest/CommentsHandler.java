@@ -4,44 +4,32 @@ import java.util.ArrayList;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.codehaus.jettison.json.JSONArray;
 import org.json.JSONObject;
-
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.satish.core.DatabaseHandler;
 import com.satish.global.Config;
 import com.satish.model.Comments;
-import com.satish.model.Likes;
-import com.satish.model.User;
 
-@Path("/post")
-public class PostCommentHandler {
-
-	@Path("/comments")
-	@GET
+@Path("/comment")
+public class CommentsHandler {
+	@Path("/create")
+	@POST
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response postComments(@QueryParam("post_id") int post_id) {
-
+	public Response loginUser(@FormParam("user1_id") int user1_id,
+			@FormParam("post_id") int post_id,@FormParam("comment") String comment) {
 		JsonObject response = new JsonObject();
-		Gson gson=new Gson();
 		ArrayList<Comments> comment_list;
 		try {
-			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
 			db.connect();
-			comment_list = db.comment(post_id);
-			// if comment is not null
+			comment_list = db.commentCreate(user1_id, post_id,comment);
 			if (comment_list != null) {
 				response.addProperty("success", true);
 				// create comment array
@@ -68,49 +56,19 @@ public class PostCommentHandler {
 					comments.add(cObj);
 				}
 				response.add("comments", comments);
-			} else {
+			}else {
 				response.addProperty("success", false);
-				JsonObject error = new JsonObject();
-				error.addProperty("code", Config.ERROR_NO_COMMENTS);
-				error.addProperty("message", "no comments on your post");
-				response.addProperty("error", gson.toJson(error));
 
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return Response.status(200).entity(response.toString()).build();
-	}
+				JSONObject error = new JSONObject();
+				error.put("code", Config.ERROR_UNKNOWN);
+				error.putOpt("message",
+						"Server busy!");
 
-	@Path("/likes")
-	@GET
-	@Produces("application/json")
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response postLikes(@QueryParam("post_id") int post_id) {
-		JSONObject response = new JSONObject();
-		ArrayList<Likes> likes_list;
-		try {
-			// connecting database
-			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
-			likes_list = db.postLikes(post_id);
-			System.out.println(likes_list.size());
-			if (likes_list != null) {
-				int count=db.countLikes(post_id);
-				response.put("success", true);
-				response.put("likes",count);
-				JSONArray likes = new JSONArray();
-				for (int i = 0; i < likes_list.size(); i++) {
-					Likes l = likes_list.get(i);
-					JSONObject likesObj = new JSONObject();
-					likesObj.put("id", l.getLiked_user_id());
-					likesObj.put("liked by",l.getLiked_by_name());
-					likes.put(likesObj);
-				}
-               response.put("likes by", likes);
+				response.addProperty("error", error.toString());
 			}
 		} catch (Exception e) {
 		}
 		return Response.status(200).entity(response.toString()).build();
 	}
+
 }

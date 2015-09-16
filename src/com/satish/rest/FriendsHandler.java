@@ -1,6 +1,9 @@
 package com.satish.rest;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -20,6 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.satish.core.DatabaseHandler;
 import com.satish.global.Config;
+import com.satish.model.Comments;
 import com.satish.model.FeedPost;
 import com.satish.model.Friend;
 import com.satish.model.User;
@@ -248,6 +252,8 @@ public class FriendsHandler {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response frinedPosts(@QueryParam("id") int id) {
 		Gson gson = new Gson();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd hh:mm:ss");
+		Calendar calendar = Calendar.getInstance();
 		JsonObject response = new JsonObject();
 		try {
 			// connecting database
@@ -284,8 +290,11 @@ public class FriendsHandler {
 					else
 						cObj.addProperty("image",
 								Config.IMAGE_SOURCE_FILE + f.getImage());
-					cObj.addProperty("created_at",
-							gson.toJson(f.getCreated_at()));
+					cObj.addProperty("post_id",f.getPost_id());
+					//convert timestamp to milliseconds
+					Date date = sdf.parse(f.getCreated_at().toString());
+					calendar.setTime(date);
+					cObj.addProperty("created_at",calendar.getTimeInMillis());
 					friends.add(cObj);
 				}
 				response.add("posts", friends);
@@ -331,4 +340,5 @@ public class FriendsHandler {
 		}
 		return Response.status(200).entity(response.toString()).build();
 	}
+	
 }
