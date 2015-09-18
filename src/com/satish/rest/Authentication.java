@@ -24,8 +24,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.gson.JsonObject;
 import com.satish.core.DatabaseHandler;
 import com.satish.global.Config;
+import com.satish.model.FeedPost;
 import com.satish.model.User;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -37,47 +39,10 @@ public class Authentication {
 	@POST
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	///@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response registerUser(
-			@FormParam("name") String name,
+	// /@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response registerUser(@FormParam("name") String name,
 			@FormParam("email") String email,
-			@FormParam("password") String password
-			
-			//@FormDataParam("profile_image") InputStream uploadedInputStream,
-			//@FormDataParam("profile_image") FormDataContentDisposition fileDetail
-			) {
-/*
-		String imageName = "";
-		int width = 0;
-		int height = 0;
-
-		// if user upload image
-		if (uploadedInputStream != null) {
-
-			String uploadedFileLocation = "/home/satish/Eclipseworkspace/facebook_rest/WebContent/images/profileImages/"
-					+ new SimpleDateFormat("yyyyMMddhhmmss").format(new Date())
-					+ "."
-					+ FilenameUtils.getExtension(fileDetail.getFileName());
-
-			writeToFile(uploadedInputStream, uploadedFileLocation);
-
-			try {
-				File f = new File(uploadedFileLocation);
-				BufferedImage image = ImageIO.read(f);
-				height = image.getHeight();
-				width = image.getWidth();
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
-
-			imageName = new SimpleDateFormat("yyyyMMddhhmmss")
-					.format(new Date())
-					+ "."
-					+ FilenameUtils.getExtension(fileDetail.getFileName());
-			System.out.println(uploadedFileLocation);
-
-		}*/
-
+			@FormParam("password") String password) {
 		System.out.println(name + "," + email + password);
 
 		// creating json response
@@ -99,7 +64,7 @@ public class Authentication {
 					profile.put("apikey", user.getApi_key());
 					profile.put("id", user.getId());
 					profile.put("created_at", user.getCreated_at());
-				//	profile.put("profileImageUrl", user.getImage());
+					// profile.put("profileImageUrl", user.getImage());
 
 					response.put("profile", profile);
 
@@ -131,28 +96,7 @@ public class Authentication {
 
 	}
 
-	/*private void writeToFile(InputStream uploadedInputStream,
-			String uploadedFileLocation) {
-
-		try {
-			OutputStream out = new FileOutputStream(new File(
-					uploadedFileLocation));
-			int read = 0;
-			byte[] bytes = new byte[1024];
-
-			out = new FileOutputStream(new File(uploadedFileLocation));
-			while ((read = uploadedInputStream.read(bytes)) != -1) {
-				out.write(bytes, 0, read);
-			}
-			// out.flush();
-			// out.close();
-		} catch (IOException e) {
-
-			e.printStackTrace();
-		}
-
-	}*/
-
+	// login class
 	@Path("/login")
 	@POST
 	@Produces("application/json")
@@ -189,6 +133,91 @@ public class Authentication {
 		} catch (Exception e) {
 		}
 		return Response.status(200).entity(response.toString()).build();
+	}
+
+	// profile upload
+	@Path("/profile_upload")
+	@POST
+	@Produces("application/json")
+	// @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response userPost(
+			@FormDataParam("user_id") int user_id,
+			@FormDataParam("profile_image") InputStream uploadedInputStream,
+			@FormDataParam("profile_image") FormDataContentDisposition fileDetail) {
+		String imageName = "";
+		String uploadedFileLocation = "";
+		int width = 0;
+		int height = 0;
+		// if user post a image
+		if (uploadedInputStream != null) {
+			imageName = new SimpleDateFormat("yyyyMMddhhmmss")
+					.format(new Date())
+					+ "."
+					+ FilenameUtils.getExtension(fileDetail.getFileName());
+			uploadedFileLocation = "/home/satish/Eclipseworkspace/facebook_rest/WebContent/images/profileImages/"
+					+ imageName;
+
+			writeToFile(uploadedInputStream, uploadedFileLocation);
+
+			try {
+				File f = new File(uploadedFileLocation);
+				BufferedImage image = ImageIO.read(f);
+				height = image.getHeight();
+				width = image.getWidth();
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+
+		}
+		// creating json object
+		JsonObject response = new JsonObject();
+		boolean uploadImage;
+		try {
+			// connect database
+			DatabaseHandler db = new DatabaseHandler();
+			db.connect();
+			System.out.println(user_id+""+imageName+""+width+""+height);
+			uploadImage = db.uploadProfile(user_id, imageName, width,
+					height);
+			if (uploadImage) {
+				response.addProperty("success", true);
+				response.add("error", null);
+			} else {
+				response.addProperty("success", false);
+				JSONObject error = new JSONObject();
+				error.put("code", Config.ERROR_UNKNOWN);
+				error.putOpt("message", "Server busy....!");
+				response.addProperty("error", error.toString());
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return Response.status(200).entity(response.toString()).build();
+	}
+
+	private void writeToFile(InputStream uploadedInputStream,
+			String uploadedFileLocation) {
+
+		try {
+			OutputStream out = new FileOutputStream(new File(
+					uploadedFileLocation));
+			int read = 0;
+			byte[] bytes = new byte[1024];
+
+			out = new FileOutputStream(new File(uploadedFileLocation));
+			while ((read = uploadedInputStream.read(bytes)) != -1) {
+				out.write(bytes, 0, read);
+			}
+			// out.flush();
+			// out.close();
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+
 	}
 
 }

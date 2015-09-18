@@ -26,7 +26,7 @@ public class DatabaseHandler {
 	private ArrayList<FeedPost> friendFeedPost;
 	private ArrayList<Likes> likes_list;
 	private PreparedStatement preparedStatement = null;
-	private Connection con;
+	private Connection con = null;
 
 	public DatabaseHandler() {
 
@@ -223,7 +223,8 @@ public class DatabaseHandler {
 			if (rs1.next()) {
 				comment_list = new ArrayList<Comments>();
 				preparedStatement = con
-						.prepareStatement("select u.name as username,profile_image,c.id as id,c.user1_id as userid,c.comment as comment,c.created_at as created_at from users u,comments c where  c.post_id=? and c.user1_id=u.id");
+						.prepareStatement("select u.name as username,profile_image,c.id as id,c.user1_id as userid,c.comment as comment,c.created_at as created_at from users u,comments c where  c.post_id=?"
+								+ " and c.user1_id=u.id order by created_at desc");
 				preparedStatement.setInt(1, post_id);
 
 				ResultSet rs = preparedStatement.executeQuery();
@@ -257,6 +258,7 @@ public class DatabaseHandler {
 
 	public ArrayList<Friend> friendsList(int user_id) {
 		connect();
+		ResultSet rs = null;
 		try {
 			preparedStatement = con
 					.prepareStatement("select u.id as id,u.name as friendName,u.profile_image as profile_image from users u where u.id in "
@@ -265,7 +267,7 @@ public class DatabaseHandler {
 
 			preparedStatement.setInt(1, user_id);
 			preparedStatement.setInt(2, user_id);
-			ResultSet rs = preparedStatement.executeQuery();
+			rs = preparedStatement.executeQuery();
 			if (rs.next()) {
 
 				friend_list = new ArrayList<Friend>();
@@ -286,19 +288,27 @@ public class DatabaseHandler {
 			e.printStackTrace();
 		} finally {
 			closeConnection();
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+			}
 		}
 		return null;
 	}
 
 	public ArrayList<Friend> findFriendList(int user_id) {
 		connect();
+		ResultSet rs = null;
 		try {
 			preparedStatement = con
-					.prepareStatement(" select u.id as id,u.name as friendName,u.profile_image as profile_image from users u where u.id not in (select f.user1_id from friends f where f.user2_id=? UNION select f.user2_id from friends f where f.user1_id = ?) and u.id != ?");
+					.prepareStatement(" select u.id as id,u.name as friendName,u.profile_image as profile_image from users u"
+							+ " where u.id not in (select f.user1_id from friends f where f.user2_id=? UNION select f.user2_id from friends f where f.user1_id = ?) and u.id != ?");
 			preparedStatement.setInt(1, user_id);
 			preparedStatement.setInt(2, user_id);
 			preparedStatement.setInt(3, user_id);
-			ResultSet rs = preparedStatement.executeQuery();
+			rs = preparedStatement.executeQuery();
 			if (rs.next()) {
 				friend_list = new ArrayList<Friend>();
 				rs.beforeFirst();
@@ -319,19 +329,28 @@ public class DatabaseHandler {
 			e.printStackTrace();
 		} finally {
 			closeConnection();
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+			}
 		}
 		return null;
 	}
 
 	public Friend addFriend(int user_id, int frined_id) {
 		connect();
+		ResultSet rs = null;
 		try {
 			preparedStatement = con
-					.prepareStatement("select distinct u.id,u.name as name from users u,friends f where u.id not in (select f.user1_id from friends f where f.user2_id=? UNION select f.user2_id from friends f where f.user1_id = ?) and u.id != ? and f.status!=0");
+					.prepareStatement("select distinct u.id,u.name as name from users u,friends f where u.id "
+							+ "not in (select f.user1_id from friends f where f.user2_id=? UNION select f.user2_id "
+							+ "from friends f where f.user1_id = ?) and u.id != ? and f.status!=0");
 			preparedStatement.setInt(1, user_id);
 			preparedStatement.setInt(2, user_id);
 			preparedStatement.setInt(3, user_id);
-			ResultSet rs = preparedStatement.executeQuery();
+			rs = preparedStatement.executeQuery();
 			if (rs.next()) {
 				preparedStatement = con
 						.prepareStatement("insert into friends (user1_id,user2_id,status) values(?,?,0)");
@@ -349,6 +368,12 @@ public class DatabaseHandler {
 			e.printStackTrace();
 		} finally {
 			closeConnection();
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+			}
 		}
 
 		return null;
@@ -356,11 +381,13 @@ public class DatabaseHandler {
 
 	public ArrayList<Likes> postLikes(int post_id) {
 		connect();
+		ResultSet rs = null;
 		try {
 			preparedStatement = con
-					.prepareStatement("select u.name as name,u.id as id from users u,likes l where l.post_id=? and l.user_id=u.id and l.like_status=1");
+					.prepareStatement("select u.name as name,u.id as id from users u,likes l where l.post_id=?"
+							+ " and l.user_id=u.id and l.like_status=1");
 			preparedStatement.setInt(1, post_id);
-			ResultSet rs = preparedStatement.executeQuery();
+			rs = preparedStatement.executeQuery();
 			likes_list = new ArrayList<Likes>();
 			if (rs.next()) {
 				rs.beforeFirst();
@@ -377,19 +404,27 @@ public class DatabaseHandler {
 			e.printStackTrace();
 		} finally {
 			closeConnection();
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+			}
 		}
 		return null;
 	}
 
 	public int countLikes(int post_id) {
 		connect();
+		ResultSet rs = null;
 		int count = 0;
 		try {
 
 			preparedStatement = con
-					.prepareStatement("select count(*) as count from users u,likes l where l.post_id=? and l.user_id=u.id and l.like_status=1");
+					.prepareStatement("select count(*) as count from users u,likes l where "
+							+ "l.post_id=? and l.user_id=u.id and l.like_status=1");
 			preparedStatement.setInt(1, post_id);
-			ResultSet rs = preparedStatement.executeQuery();
+			rs = preparedStatement.executeQuery();
 			if (rs.next())
 				count = rs.getInt("count");
 			System.out.println(rs.getInt("count"));
@@ -397,6 +432,12 @@ public class DatabaseHandler {
 		} catch (Exception e) {
 		} finally {
 			closeConnection();
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+			}
 		}
 		return count;
 
@@ -424,6 +465,7 @@ public class DatabaseHandler {
 
 	public ArrayList<FeedPost> friendsPosts(int user_id) {
 		connect();
+		ResultSet rs = null;
 		System.out.println(user_id);
 
 		try {
@@ -436,7 +478,7 @@ public class DatabaseHandler {
 			preparedStatement.setInt(1, user_id);
 			preparedStatement.setInt(2, user_id);
 			preparedStatement.setInt(3, user_id);
-			ResultSet rs = preparedStatement.executeQuery();
+			rs = preparedStatement.executeQuery();
 			System.out.println("result" + rs);
 			if (rs.next()) {
 				System.out.println("true");
@@ -462,20 +504,26 @@ public class DatabaseHandler {
 			e.printStackTrace();
 		} finally {
 			closeConnection();
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+			}
 		}
 		return null;
 	}
 
 	public User profile(int id) {
 		connect();
-
+		ResultSet rs = null;
 		try {
 			preparedStatement = con
 					.prepareStatement("select name,email,profile_image,created_at from users where id = ?");
 			preparedStatement.setInt(1, id);
 			// int row = preparedStatement.executeUpdate();
 			// check id is existed or not
-			ResultSet rs = preparedStatement.executeQuery();
+			rs = preparedStatement.executeQuery();
 			if (rs.next()) {
 				User user = new User();
 				user.setName(rs.getString("name"));
@@ -494,17 +542,25 @@ public class DatabaseHandler {
 			e.printStackTrace();
 		} finally {
 			closeConnection();
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+			}
 		}
 		return null;
 	}
 
 	public ArrayList<FeedPost> posts(int id) {
 		connect();
+		ResultSet rs = null;
 		try {
 			preparedStatement = con
-					.prepareStatement("select posts.id as id,user_id,text,image,image_width,image_height,profile_image,posts.created_at as created_at,name from posts,users where users.id=posts.user_id and user_id=?");
+					.prepareStatement("select posts.id as id,user_id,text,image,image_width,image_height,profile_image,posts.created_at as created_at,name"
+							+ " from posts,users where users.id=posts.user_id and user_id=?");
 			preparedStatement.setInt(1, id);
-			ResultSet rs = preparedStatement.executeQuery();
+			rs = preparedStatement.executeQuery();
 			System.out.println(rs.next());
 			if (rs.next()) {
 				friendFeedPost = new ArrayList<FeedPost>();
@@ -529,6 +585,12 @@ public class DatabaseHandler {
 
 		} finally {
 			closeConnection();
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+			}
 		}
 		return null;
 	}
@@ -554,4 +616,28 @@ public class DatabaseHandler {
 		return false;
 	}
 
+	public boolean uploadProfile(int user_id, String imageName, int width,
+			int height) {
+		connect();
+		System.out.println("in auth " + user_id + " " + imageName + "  "
+				+ width + "  " + height);
+		try {
+			preparedStatement = con
+					.prepareStatement("update users set profile_image=?,image_width=?,image_height=? where id=?");
+			preparedStatement.setString(1, imageName);
+			preparedStatement.setInt(2, width);
+			preparedStatement.setInt(3, height);
+			preparedStatement.setInt(4, user_id);
+			int row = preparedStatement.executeUpdate();
+			System.out.println(row);
+			if (row > 0)
+				return true;
+			else
+				return false;
+		} catch (Exception e) {
+		} finally {
+			closeConnection();
+		}
+		return false;
+	}
 }
