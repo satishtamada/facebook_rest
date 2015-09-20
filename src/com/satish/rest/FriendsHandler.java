@@ -154,7 +154,7 @@ public class FriendsHandler {
 						cObj.addProperty("image",
 								Config.IMAGE_SOURCE_FILE + f.getImage());
 					else
-						cObj.addProperty("image","");
+						cObj.addProperty("image", "");
 					cObj.addProperty("post_id", f.getPost_id());
 					cObj.addProperty("text", f.getText());
 					cObj.addProperty("created_at", f.getCreated_at().toString());
@@ -199,7 +199,6 @@ public class FriendsHandler {
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response posts(@QueryParam("id") int id) {
-		Gson gson = new Gson();
 		JsonObject response = new JsonObject();
 		try {
 			// connecting database
@@ -255,7 +254,7 @@ public class FriendsHandler {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd hh:mm:ss");
 		Calendar calendar = Calendar.getInstance();
 		JsonObject response = new JsonObject();
-		
+
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
@@ -291,17 +290,17 @@ public class FriendsHandler {
 					else
 						cObj.addProperty("image",
 								Config.IMAGE_SOURCE_FILE + f.getImage());
-					cObj.addProperty("post_id",f.getPost_id());
-					//comments count 
-					ArrayList<Comments> comments=db.comment(f.getPost_id());
-					if(comments!=null){
+					cObj.addProperty("post_id", f.getPost_id());
+					// comments count
+					ArrayList<Comments> comments = db.comment(f.getPost_id());
+					if (comments != null) {
 						cObj.addProperty("comments_count", comments.size());
-					}
-					else cObj.addProperty("comments_count",0);
-					//convert timestamp to milliseconds
+					} else
+						cObj.addProperty("comments_count", 0);
+					// convert timestamp to milliseconds
 					Date date = sdf.parse(f.getCreated_at().toString());
 					calendar.setTime(date);
-					cObj.addProperty("created_at",calendar.getTimeInMillis());
+					cObj.addProperty("created_at", calendar.getTimeInMillis());
 					friends.add(cObj);
 				}
 				response.add("posts", friends);
@@ -347,5 +346,5 @@ public class FriendsHandler {
 		}
 		return Response.status(200).entity(response.toString()).build();
 	}
-	
+
 }

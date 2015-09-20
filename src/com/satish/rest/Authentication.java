@@ -145,6 +145,7 @@ public class Authentication {
 			@FormDataParam("user_id") int user_id,
 			@FormDataParam("profile_image") InputStream uploadedInputStream,
 			@FormDataParam("profile_image") FormDataContentDisposition fileDetail) {
+		System.out.println("in authentication"+fileDetail.getFileName());
 		String imageName = "";
 		String uploadedFileLocation = "";
 		int width = 0;
@@ -177,7 +178,6 @@ public class Authentication {
 			// connect database
 			DatabaseHandler db = new DatabaseHandler();
 			db.connect();
-			System.out.println(user_id+""+imageName+""+width+""+height);
 			uploadImage = db.uploadProfile(user_id, imageName, width,
 					height);
 			if (uploadImage) {

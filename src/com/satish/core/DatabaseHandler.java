@@ -473,11 +473,11 @@ public class DatabaseHandler {
 					.prepareStatement("select image,text,name,profile_image,posts.created_at as created_at,posts.id as post_id from posts,users where"
 							+ " users.id=posts.user_id and user_id in(select u.id as id from users u,friends f where u.id in"
 							+ "(select f.user2_id from friends f,users u where f.user1_id=? and f.user2_id=u.id)"
-							+ "or(select f.user1_id from friends f where f.user2_id=? and f.user1_id=u.id) and ?) order by posts.created_at desc");
+							+ "or(select f.user1_id from friends f where f.user2_id=? and f.user1_id=u.id))order by posts.created_at desc");
 
 			preparedStatement.setInt(1, user_id);
 			preparedStatement.setInt(2, user_id);
-			preparedStatement.setInt(3, user_id);
+			//preparedStatement.setInt(3, user_id);
 			rs = preparedStatement.executeQuery();
 			System.out.println("result" + rs);
 			if (rs.next()) {
@@ -556,9 +556,9 @@ public class DatabaseHandler {
 		connect();
 		ResultSet rs = null;
 		try {
+			System.out.println(id);
 			preparedStatement = con
-					.prepareStatement("select posts.id as id,user_id,text,image,image_width,image_height,profile_image,posts.created_at as created_at,name"
-							+ " from posts,users where users.id=posts.user_id and user_id=?");
+					.prepareStatement("select posts.id as id,user_id,text,posts.image,posts.image_width,posts.image_height,profile_image,posts.created_at as created_at,name from posts,users where users.id=posts.user_id and user_id=?");
 			preparedStatement.setInt(1, id);
 			rs = preparedStatement.executeQuery();
 			System.out.println(rs.next());
@@ -583,7 +583,7 @@ public class DatabaseHandler {
 				return null;
 		} catch (Exception e) {
 
-		} finally {
+		}/* finally {
 			closeConnection();
 			try {
 				if (rs != null) {
@@ -591,7 +591,7 @@ public class DatabaseHandler {
 				}
 			} catch (Exception e) {
 			}
-		}
+		}*/
 		return null;
 	}
 
@@ -619,8 +619,6 @@ public class DatabaseHandler {
 	public boolean uploadProfile(int user_id, String imageName, int width,
 			int height) {
 		connect();
-		System.out.println("in auth " + user_id + " " + imageName + "  "
-				+ width + "  " + height);
 		try {
 			preparedStatement = con
 					.prepareStatement("update users set profile_image=?,image_width=?,image_height=? where id=?");
