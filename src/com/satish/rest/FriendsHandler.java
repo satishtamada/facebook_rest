@@ -329,19 +329,88 @@ public class FriendsHandler {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
 			db.connect();
-			Friend f = db.addFriend(user_id, frined_id);
-			if (f != null) {
+			boolean success = db.addFriend(user_id, frined_id);
+			if (success) {
 				response.put("success", true);
-				response.put("message",
-						"your request sent " + f.getFriend_name());
+				response.put("message", "your request sent");
 			} else {
 				response.put("success", false);
 				JSONObject error = new JSONObject();
-				error.put("code", Config.ERROR_UNKNOWN);
-				error.putOpt("message", "unknown error!");
+				error.put("code", Config.ERROR_FRIEND_EXISTED);
+				error.putOpt("message", "friend already exits");
 				response.put("error", error);
 			}
 
+		} catch (Exception e) {
+		}
+		return Response.status(200).entity(response.toString()).build();
+	}
+	@Path("/add_friend_confirm")
+	@POST
+	@Produces("application/json")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	// @Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response addFriendAccept(@FormParam("user_id") int user_id,
+			@FormParam("friend_id") int frined_id) {
+		JSONObject response = new JSONObject();
+		try {
+			// connecting database
+			DatabaseHandler db = new DatabaseHandler();
+			db.connect();
+			boolean success = db.addFriendAccept(user_id, frined_id);
+			if (success) {
+				response.put("success", true);
+				response.put("message", "your accept success");
+			} else {
+				response.put("success", false);
+				JSONObject error = new JSONObject();
+				error.put("code", Config.ERROR_FRIEND_EXISTED);
+				error.putOpt("message", "fail to accept");
+				response.put("error", error);
+			}
+
+		} catch (Exception e) {
+		}
+		return Response.status(200).entity(response.toString()).build();
+	}
+
+	@Path("/friend_requests")
+	@GET
+	@Produces("application/json")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response friendSuggestions(@QueryParam("id") int id) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd hh:mm:ss");
+		Calendar calendar = Calendar.getInstance();
+		JsonObject response = new JsonObject();
+        ArrayList<Friend> friends;
+		try {
+			// connecting database
+			DatabaseHandler db = new DatabaseHandler();
+			db.connect();
+			friends = db.suggestionFriends(id);
+			JsonArray friendArray = new JsonArray();
+			if (friends!= null) {
+				response.addProperty("success",true);
+				for (int i = 0; i < friends.size(); i++) {
+					Friend f = friends.get(i);
+					// adding elements to json object
+					JsonObject cObj = new JsonObject();
+					cObj.addProperty("username", f.getFriend_name());
+					cObj.addProperty("id", f.getFriend_id());
+					if (f.getProfile_image() != null)
+						cObj.addProperty("profile_image",
+								Config.PROFILE_IMAGE_URL + f.getProfile_image());
+					else
+						cObj.addProperty("profile_image",
+								Config.PROFILE_IAMGE_DEFAULT);
+					friendArray.add(cObj);
+				}
+				response.add("friends", friendArray);
+			} else {
+				response.addProperty("success", true);
+				response.add("friends",friendArray);
+			}
+			
 		} catch (Exception e) {
 		}
 		return Response.status(200).entity(response.toString()).build();
