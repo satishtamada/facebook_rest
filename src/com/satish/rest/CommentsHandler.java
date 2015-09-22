@@ -26,7 +26,6 @@ public class CommentsHandler {
 		boolean comment_post;
 		try {
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			comment_post= db.commentCreate(user1_id, post_id,comment);
 			if (comment_post) {
 				response.addProperty("success", true);

@@ -75,7 +75,6 @@ public class FeedHandler {
 		try {
 			// connect database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			FeedPost feedpost = db.feedPost(user_id, text, imageName, width,
 					height);
 			if (feedpost != null) {

@@ -39,7 +39,6 @@ public class PostCommentHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			comment_list = db.comment(post_id);
 			// if comment is not null
 			if (comment_list != null) {
@@ -92,7 +91,6 @@ public class PostCommentHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			likes_list = db.postLikes(post_id);
 			System.out.println(likes_list.size());
 			if (likes_list != null) {

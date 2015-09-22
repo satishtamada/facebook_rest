@@ -41,7 +41,6 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			friendlist = db.friendsList(id);
 			if (friendlist != null) {
 				response.addProperty("success", true);
@@ -87,7 +86,6 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			findfriendlist = db.findFriendList(id);
 			if (findfriendlist != null) {
 				response.addProperty("success", true);
@@ -136,7 +134,6 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			User user = db.profile(id);
 			friendlist = db.friendsList(id);
 			posts = db.posts(id);
@@ -203,7 +200,6 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			ArrayList<FeedPost> posts = db.posts(id);
 			if (posts != null) {
 				response.addProperty("success", true);
@@ -258,7 +254,6 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			User user = db.profile(id);
 			ArrayList<FeedPost> posts = db.friendsPosts(id);
 			if (posts != null) {
@@ -328,7 +323,6 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			boolean success = db.addFriend(user_id, frined_id);
 			if (success) {
 				response.put("success", true);
@@ -356,7 +350,6 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			boolean success = db.addFriendAccept(user_id, frined_id);
 			if (success) {
 				response.put("success", true);
@@ -366,6 +359,33 @@ public class FriendsHandler {
 				JSONObject error = new JSONObject();
 				error.put("code", Config.ERROR_FRIEND_EXISTED);
 				error.putOpt("message", "fail to accept");
+				response.put("error", error);
+			}
+
+		} catch (Exception e) {
+		}
+		return Response.status(200).entity(response.toString()).build();
+	
+	}@Path("/add_friend_delete")
+	@POST
+	@Produces("application/json")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	// @Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response addFriendDelete(@FormParam("user_id") int user_id,
+			@FormParam("friend_id") int frined_id) {
+		JSONObject response = new JSONObject();
+		try {
+			// connecting database
+			DatabaseHandler db = new DatabaseHandler();
+			boolean success = db.addFrienddelete(user_id, frined_id);
+			if (success) {
+				response.put("success", true);
+				response.put("message", "your request deleted");
+			} else {
+				response.put("success", false);
+				JSONObject error = new JSONObject();
+				error.put("code", Config.ERROR_FRIEND_EXISTED);
+				error.putOpt("message", "fail to delete request");
 				response.put("error", error);
 			}
 
@@ -386,7 +406,6 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
 			friends = db.suggestionFriends(id);
 			JsonArray friendArray = new JsonArray();
 			if (friends!= null) {

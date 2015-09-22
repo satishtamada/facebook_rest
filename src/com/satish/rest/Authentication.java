@@ -50,7 +50,7 @@ public class Authentication {
 		JSONObject response = new JSONObject();
 		try {
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
+			
 
 			if (!db.isUserExisted(email)) {
 				User user = db.createUser(name, email, password);
@@ -107,8 +107,7 @@ public class Authentication {
 		JSONObject response = new JSONObject();
 		try {
 			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
-			User user = db.loginUser(email, password);
+				User user = db.loginUser(email, password);
 			if (user != null) {
 				response.put("success", true);
 				response.put("error", "null");
@@ -175,9 +174,8 @@ public class Authentication {
 		JsonObject response = new JsonObject();
 		boolean uploadImage;
 		try {
-			// connect database
-			DatabaseHandler db = new DatabaseHandler();
-			db.connect();
+					DatabaseHandler db = new DatabaseHandler();
+			
 			uploadImage = db.uploadProfile(user_id, imageName, width,
 					height);
 			if (uploadImage) {

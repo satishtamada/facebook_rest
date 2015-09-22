@@ -109,24 +109,9 @@ public class DatabaseHandler {
 
 	}
 
-	private void closeConnection() {
-		// finally block used to close resources
-		try {
-			if (con != null)
-				con.close();
-		} catch (Exception se) {
-			se.printStackTrace();
-		}
-		try {
-			if (preparedStatement != null)
-				preparedStatement.close();
-		} catch (Exception e) {
-		}
-	}
-
 	public User loginUser(String email, String password) {
+		connect();
 		try {
-			connect();
 			preparedStatement = con
 					.prepareStatement("select *from users where email = ?");
 			preparedStatement.setString(1, email);
@@ -162,7 +147,7 @@ public class DatabaseHandler {
 			int width, int height) {
 		connect();
 		try {
-			connect();
+
 			preparedStatement = con
 					.prepareStatement("insert into posts(user_id, text,image,image_width,image_height) values(?,?,?,?,?)");
 			preparedStatement.setInt(1, user_id);
@@ -346,6 +331,7 @@ public class DatabaseHandler {
 
 	public boolean addFriend(int user_id, int frined_id) {
 		connect();
+		System.out.println("uid" + user_id + " fid: " + frined_id);
 		ResultSet rs = null;
 		try {
 			preparedStatement = con
@@ -445,7 +431,6 @@ public class DatabaseHandler {
 	}
 
 	public boolean isUserExisted(String email) {
-		connect();
 		try {
 			preparedStatement = con
 					.prepareStatement("select email from users where email = ?");
@@ -588,10 +573,16 @@ public class DatabaseHandler {
 				return null;
 		} catch (Exception e) {
 
-		}/*
-		 * finally { closeConnection(); try { if (rs != null) { rs.close(); } }
-		 * catch (Exception e) { } }
-		 */
+		} finally {
+			closeConnection();
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+			}
+		}
+
 		return null;
 	}
 
@@ -666,6 +657,13 @@ public class DatabaseHandler {
 				return null;
 		} catch (Exception e) {
 
+		} finally {
+			closeConnection();
+			try {
+				if (rs != null)
+					rs.close();
+			} catch (Exception e) {
+			}
 		}
 		return null;
 	}
@@ -684,8 +682,45 @@ public class DatabaseHandler {
 				return false;
 		} catch (Exception e) {
 
+		} finally {
+			closeConnection();
 		}
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public boolean addFrienddelete(int user_id, int frined_id) {
+		connect();
+		try {
+			preparedStatement = con
+					.prepareStatement("delete from friends where user1_id=? and user2_id=? and status=0");
+			preparedStatement.setInt(1, user_id);
+			preparedStatement.setInt(2, frined_id);
+			int row = preparedStatement.executeUpdate();
+			if (row > 0) {
+				return true;
+			} else
+				return false;
+		} catch (Exception e) {
+
+		} finally {
+			closeConnection();
+		}
+		return false;
+	}
+
+	private void closeConnection() {
+		// finally block used to close resources
+		try {
+			if (con != null)
+				con.close();
+		} catch (Exception se) {
+			se.printStackTrace();
+		}
+		try {
+			if (preparedStatement != null)
+				preparedStatement.close();
+		} catch (Exception e) {
+		}
 	}
 }
