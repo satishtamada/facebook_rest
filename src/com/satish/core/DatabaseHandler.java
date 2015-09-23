@@ -285,15 +285,15 @@ public class DatabaseHandler {
 		return null;
 	}
 
-	public ArrayList<Friend> findFriendList(int user_id) {
+	public ArrayList<Friend> friendSuggestions(int user_id) {
 		connect();
 		ResultSet rs = null;
 		try {
 			preparedStatement = con
 					.prepareStatement(
-							" select u.id as id,u.name as friendName,u.profile_image as profile_image from users u"
-									+ " where u.id not in (select f.user1_id from friends f where f.user2_id=? UNION "
-									+ "select f.user2_id from friends f where f.user1_id = ?) and u.id != ?",
+							" select u.id as id,u.name as friendName,u.profile_image as profile_image from users u where u.id not in" +
+							" (select f.user1_id from friends f where f.user2_id=? UNION select f.user2_id from friends f where f.user1_id = ?) " +
+							"and u.id != ?;",
 							ResultSet.TYPE_SCROLL_INSENSITIVE);
 			preparedStatement.setInt(1, user_id);
 			preparedStatement.setInt(2, user_id);
@@ -331,19 +331,19 @@ public class DatabaseHandler {
 
 	public boolean addFriend(int user_id, int frined_id) {
 		connect();
-		System.out.println("uid" + user_id + " fid: " + frined_id);
 		ResultSet rs = null;
 		try {
 			preparedStatement = con
-					.prepareStatement("select distinct user1_id,user2_id from friends where user1_id=? and user2_id=?");
-			preparedStatement.setInt(1, user_id);
-			preparedStatement.setInt(2, frined_id);
+					.prepareStatement("select user1_id,user2_id from friends where user1_id=? and user2_id=? and status=0",ResultSet.TYPE_SCROLL_INSENSITIVE);
+			preparedStatement.setInt(1, frined_id);
+			preparedStatement.setInt(2, user_id);
 			rs = preparedStatement.executeQuery();
+			rs.isBeforeFirst();
 			if (!rs.next()) {
 				preparedStatement = con
 						.prepareStatement("insert into friends (user1_id,user2_id) values(?,?)");
-				preparedStatement.setInt(1, user_id);
-				preparedStatement.setInt(2, frined_id);
+				preparedStatement.setInt(1, frined_id);
+				preparedStatement.setInt(2, user_id);
 				int row = preparedStatement.executeUpdate();
 				if (row > 0) {
 					return true;
@@ -449,7 +449,7 @@ public class DatabaseHandler {
 		return false;
 	}
 
-	public ArrayList<FeedPost> friendsPosts(int user_id) {
+	public ArrayList<FeedPost> feed(int user_id) {
 		connect();
 		ResultSet rs = null;
 		System.out.println(user_id);
@@ -457,15 +457,16 @@ public class DatabaseHandler {
 		try {
 			preparedStatement = con
 					.prepareStatement(
-							"select image,text,name,profile_image,posts.created_at as created_at,posts.id as post_id from posts,users where"
-									+ " users.id=posts.user_id and user_id in(select u.id as id from users u,friends f where u.id in"
-									+ "(select f.user2_id from friends f,users u where f.user1_id=? and f.user2_id=u.id)"
-									+ "or(select f.user1_id from friends f where f.user2_id=? and f.user1_id=u.id))order by posts.created_at desc",
+							"select image,text,name,profile_image,posts.created_at as created_at,posts.id as post_id from posts,users where" +
+							" (users.id=posts.user_id and users.id in" +
+							"(select u.id as id from users u,friends f where u.id in (select f.user2_id from friends f,users u where f.user1_id=? and f.user2_id=u.id and f.status=1)" +
+							" or(select f.user1_id from friends f where f.user2_id=? and f.user1_id=u.id and f.status=1))) " +
+							"or (posts.user_id=? and posts.user_id = users.id) order by posts.created_at desc",
 							ResultSet.TYPE_SCROLL_INSENSITIVE);
 
 			preparedStatement.setInt(1, user_id);
 			preparedStatement.setInt(2, user_id);
-			// preparedStatement.setInt(3, user_id);
+			preparedStatement.setInt(3, user_id);
 			rs = preparedStatement.executeQuery();
 			System.out.println("result" + rs);
 			if (rs.next()) {
@@ -630,7 +631,7 @@ public class DatabaseHandler {
 		return false;
 	}
 
-	public ArrayList<Friend> suggestionFriends(int id) {
+	public ArrayList<Friend> friendRequests(int id) {
 		connect();
 		ResultSet rs = null;
 		try {

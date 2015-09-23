@@ -75,7 +75,7 @@ public class FriendsHandler {
 
 	}
 
-	@Path("/find_friend")
+	@Path("/friend_suggestions")
 	@GET
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -86,7 +86,7 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			findfriendlist = db.findFriendList(id);
+			findfriendlist = db.friendSuggestions(id);
 			if (findfriendlist != null) {
 				response.addProperty("success", true);
 				// create friends array
@@ -241,7 +241,7 @@ public class FriendsHandler {
 		return Response.status(200).entity(response.toString()).build();
 	}
 
-	@Path("/friend_posts")
+	@Path("/feed")
 	@GET
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -255,7 +255,7 @@ public class FriendsHandler {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
 			User user = db.profile(id);
-			ArrayList<FeedPost> posts = db.friendsPosts(id);
+			ArrayList<FeedPost> posts = db.feed(id);
 			if (posts != null) {
 				response.addProperty("success", true);
 				response.addProperty("username", user.getName());
@@ -406,7 +406,7 @@ public class FriendsHandler {
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			friends = db.suggestionFriends(id);
+			friends = db.friendRequests(id);
 			JsonArray friendArray = new JsonArray();
 			if (friends!= null) {
 				response.addProperty("success",true);
