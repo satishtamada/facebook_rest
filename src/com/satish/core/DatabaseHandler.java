@@ -724,4 +724,63 @@ public class DatabaseHandler {
 		} catch (Exception e) {
 		}
 	}
+
+	public User getUserByPost(int post_id) {
+		connect();
+		try {
+			preparedStatement = con
+					.prepareStatement("select u.* from users u, posts p where p.id = ? AND u.id = p.user_id", ResultSet.TYPE_SCROLL_INSENSITIVE);
+			preparedStatement.setInt(1, post_id);
+
+			ResultSet rs = preparedStatement.executeQuery();
+			rs.isBeforeFirst();
+			
+			System.out.println("1");
+			if (rs.next()) {
+					User user = new User();
+					user.setName(rs.getString("name"));
+					user.setEmail(rs.getString("email"));
+					user.setApi_key(rs.getString("api_key"));
+					user.setId(rs.getInt("id"));
+					user.setCreated_at(rs.getTimestamp("created_at"));
+					return user;
+			}
+			
+			System.out.println("2");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			closeConnection();
+		}
+		return null;
+	}
+
+	public boolean createNotification(int user1_id, int user2_id, String message,
+			int type, int status) {
+		
+		connect();
+		try {
+
+			preparedStatement = con
+					.prepareStatement("insert into notifications(user1_id, user2_id, message, type, status) values (?, ?, ?, ?, ?)");
+			preparedStatement.setInt(1, user1_id);
+			preparedStatement.setInt(2, user2_id);
+			preparedStatement.setString(3, message);
+			preparedStatement.setInt(4, type);
+			preparedStatement.setInt(5, status);
+			int row = preparedStatement.executeUpdate();
+
+			if (row > 0) {
+				return true;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			closeConnection();
+		}
+
+		return false;
+	}
 }

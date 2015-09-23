@@ -13,6 +13,8 @@ import org.json.JSONObject;
 import com.google.gson.JsonObject;
 import com.satish.core.DatabaseHandler;
 import com.satish.global.Config;
+import com.satish.helper.Parse;
+import com.satish.model.User;
 
 @Path("/comment")
 public class CommentsHandler {
@@ -30,6 +32,49 @@ public class CommentsHandler {
 			if (comment_post) {
 				response.addProperty("success", true);
 				response.add("error",null);
+				
+				System.out.println("user by post:x ");
+				
+				// get post owner
+				User user = db.getUserByPost(post_id);
+				
+				System.out.println("user by post: " + user.getId() + ", name: " + user.getName());
+				
+				if(user != null){
+					
+					int length = comment.length();
+					length = length >= 20 ? 20 : length;
+					String commentShort = comment.substring(0, length);
+					
+					// create notification row
+					String message = Config.PUSH_MESSAGE_NEW_COMMENT.replace("#name#", user.getName()).replace("#comment#", commentShort);
+					
+					boolean notification = db.createNotification(user.getId(), user1_id, message, Config.NOTIFICATION_COMMENT, 0);
+					
+					if(notification){
+						// send push notification
+						JSONObject jObj = new JSONObject();
+						jObj.put("flag", 1);
+						jObj.put("is_background", false);
+						
+						JSONObject jData = new JSONObject();
+						jData.put("message", message);
+						jData.put("title", "New Comment");
+						
+						jObj.put("data", jData);
+						
+						
+						System.out.println("push: "+ jObj.toString());
+						
+						Parse parse = new Parse();
+						// parse.sendPush(json);
+						parse.sendPushNotification(user.getEmail(), jObj.toString());
+					}else{
+						System.out.println("Failed to store notification");
+					}
+				}
+				
+				
 			}else {
 				response.addProperty("success", false);
 				JSONObject error = new JSONObject();

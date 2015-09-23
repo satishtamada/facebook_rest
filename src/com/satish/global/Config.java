@@ -11,4 +11,13 @@ public class Config {
 	public static final String IMAGE_SOURCE_FILE=URL+"images/";
 	public static final String PROFILE_IMAGE_URL=URL+"images/profileImages/";
 	public static final String PROFILE_IAMGE_DEFAULT=URL+"images/profileImages/profile_selected.jpg";
+	public static final int NOTIFICATION_COMMENT = 1;
+	
+	
+	//Parse config
+	public static final String PARSE_API_ID = "3M4IbwBiVGDiJLLRWbaUWDbBujhyI4mj0R2U7Fvg";
+	public static final String PARSE_CLIENT_KEY = "y9wSfJF9JBQiE86rxOJ99v0EZ7d9LnAasujGN8v7";
+	
+	
+	public static final String PUSH_MESSAGE_NEW_COMMENT = "#name# has commented on your post. \"#comment# ...\"";
 }
