@@ -40,11 +40,11 @@ public class PostCommentHandler {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
 			comment_list = db.comment(post_id);
+			// create comment array
+			JsonArray comments = new JsonArray();
 			// if comment is not null
 			if (comment_list != null) {
 				response.addProperty("success", true);
-				// create comment array
-				JsonArray comments = new JsonArray();
 				
 				for (int i = 0; i < comment_list.size(); i++) {
 					Comments c = comment_list.get(i);
@@ -68,11 +68,8 @@ public class PostCommentHandler {
 				}
 				response.add("comments", comments);
 			} else {
-				response.addProperty("success", false);
-				JsonObject error = new JsonObject();
-				error.addProperty("code", Config.ERROR_NO_COMMENTS);
-				error.addProperty("message", "no comments on your post");
-				response.addProperty("error", gson.toJson(error));
+				response.addProperty("success", true);
+				response.add("comments", comments);
 
 			}
 		} catch (Exception e) {

@@ -836,7 +836,7 @@ public class DatabaseHandler {
 				notification_list = new ArrayList<Notifications>();
 				preparedStatement = con
 						.prepareStatement("select u.name as username,profile_image,n.user_id as userid,n.post_id as post_id,n.message as message,n.created_at as created_at ,n.status as status from users u,notifications n where "
-								+ "n.post_id in (select id from posts where user_id=?) and n.user_id=u.id");
+								+ "n.post_id in (select id from posts where user_id=?) and n.user_id=u.id order by created_at desc");
 				preparedStatement.setInt(1, user_id);
 				ResultSet rs = preparedStatement.executeQuery();
 				while (rs.next()) {
@@ -862,6 +862,44 @@ public class DatabaseHandler {
 				return null;
 		} catch (Exception e) {
 
+		} finally {
+			closeConnection();
+		}
+		return null;
+	}
+
+	public FeedPost feedItem(int post_id) {
+		connect();
+		ResultSet rs = null;
+		try {
+			preparedStatement = con
+					.prepareStatement(
+							"select u.name as name,p.text as text,p.image as image,p.created_at as created_at,u.profile_image as profile_image from users u,posts p where p.user_id=u.id and p.id=?",
+							ResultSet.TYPE_SCROLL_INSENSITIVE);
+			preparedStatement.setInt(1, post_id);
+			rs = preparedStatement.executeQuery();
+			rs.isBeforeFirst();
+			if (rs.next()) {
+				FeedPost feedItem = new FeedPost();
+				feedItem.setUsername(rs.getString("name"));
+				feedItem.setProfile_image(rs.getString("profile_image"));
+				feedItem.setImage(rs.getString("image"));
+				feedItem.setText(rs.getString("text"));
+				feedItem.setCreated_at(rs.getTimestamp("created_at"));
+				return feedItem;
+			}
+
+			System.out.println("3");
+
+		} catch (Exception e) {
+
+		} finally {
+			closeConnection();
+			if (rs != null)
+				try {
+					rs.close();
+				} catch (Exception e) {
+				}
 		}
 		return null;
 	}

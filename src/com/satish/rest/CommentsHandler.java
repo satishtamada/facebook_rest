@@ -51,8 +51,8 @@ public class CommentsHandler {
 					
 					// create notification row
 					String message = Config.PUSH_MESSAGE_NEW_COMMENT.replace("#name#", userCommentOwner.getName()).replace("#comment#", commentShort);
-					
-					boolean notification = db.createNotification(user1_id,post_id, message, Config.NOTIFICATION_COMMENT, 0);
+					String db_message= Config.DB_MESSAGE_NEW_COMMENT.replace("#name#", userCommentOwner.getName()).replace("#comment#", commentShort);
+					boolean notification = db.createNotification(user1_id,post_id, db_message, Config.NOTIFICATION_COMMENT, 0);
 					
 					if(notification){
 						// send push notification
