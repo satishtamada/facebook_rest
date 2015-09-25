@@ -35,21 +35,24 @@ public class CommentsHandler {
 				
 				System.out.println("user by post:x ");
 				
+				
 				// get post owner
-				User user = db.getUserByPost(post_id);
+				User userOwner = db.getUserByPost(post_id);
+				// get post owner
+				User userCommentOwner = db.getUserByCommented(user1_id);
 				
-				System.out.println("user by post: " + user.getId() + ", name: " + user.getName());
+				System.out.println("user by post: " + userCommentOwner.getId() + ", name: " + userCommentOwner.getName());
 				
-				if(user != null){
+				if(userOwner != null){
 					
 					int length = comment.length();
 					length = length >= 20 ? 20 : length;
 					String commentShort = comment.substring(0, length);
 					
 					// create notification row
-					String message = Config.PUSH_MESSAGE_NEW_COMMENT.replace("#name#", user.getName()).replace("#comment#", commentShort);
+					String message = Config.PUSH_MESSAGE_NEW_COMMENT.replace("#name#", userCommentOwner.getName()).replace("#comment#", commentShort);
 					
-					boolean notification = db.createNotification(user.getId(), user1_id, message, Config.NOTIFICATION_COMMENT, 0);
+					boolean notification = db.createNotification(user1_id,post_id, message, Config.NOTIFICATION_COMMENT, 0);
 					
 					if(notification){
 						// send push notification
@@ -68,7 +71,7 @@ public class CommentsHandler {
 						
 						Parse parse = new Parse();
 						// parse.sendPush(json);
-						parse.sendPushNotification(user.getEmail(), jObj.toString());
+						parse.sendPushNotification(userOwner.getEmail(), jObj.toString());
 					}else{
 						System.out.println("Failed to store notification");
 					}

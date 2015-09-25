@@ -14,6 +14,7 @@ import com.satish.model.Comments;
 import com.satish.model.FeedPost;
 import com.satish.model.Friend;
 import com.satish.model.Likes;
+import com.satish.model.Notifications;
 import com.satish.model.User;
 
 public class DatabaseHandler {
@@ -25,6 +26,7 @@ public class DatabaseHandler {
 	private ArrayList<Friend> friend_list;
 	private ArrayList<FeedPost> friendFeedPost;
 	private ArrayList<Likes> likes_list;
+	private ArrayList<Notifications> notification_list;
 	private PreparedStatement preparedStatement = null;
 	private Connection con = null;
 
@@ -291,9 +293,9 @@ public class DatabaseHandler {
 		try {
 			preparedStatement = con
 					.prepareStatement(
-							" select u.id as id,u.name as friendName,u.profile_image as profile_image from users u where u.id not in" +
-							" (select f.user1_id from friends f where f.user2_id=? UNION select f.user2_id from friends f where f.user1_id = ?) " +
-							"and u.id != ?;",
+							" select u.id as id,u.name as friendName,u.profile_image as profile_image from users u where u.id not in"
+									+ " (select f.user1_id from friends f where f.user2_id=? UNION select f.user2_id from friends f where f.user1_id = ?) "
+									+ "and u.id != ?;",
 							ResultSet.TYPE_SCROLL_INSENSITIVE);
 			preparedStatement.setInt(1, user_id);
 			preparedStatement.setInt(2, user_id);
@@ -334,7 +336,9 @@ public class DatabaseHandler {
 		ResultSet rs = null;
 		try {
 			preparedStatement = con
-					.prepareStatement("select user1_id,user2_id from friends where user1_id=? and user2_id=? and status=0",ResultSet.TYPE_SCROLL_INSENSITIVE);
+					.prepareStatement(
+							"select user1_id,user2_id from friends where user1_id=? and user2_id=? and status=0",
+							ResultSet.TYPE_SCROLL_INSENSITIVE);
 			preparedStatement.setInt(1, frined_id);
 			preparedStatement.setInt(2, user_id);
 			rs = preparedStatement.executeQuery();
@@ -457,11 +461,11 @@ public class DatabaseHandler {
 		try {
 			preparedStatement = con
 					.prepareStatement(
-							"select image,text,name,profile_image,posts.created_at as created_at,posts.id as post_id from posts,users where" +
-							" (users.id=posts.user_id and users.id in" +
-							"(select u.id as id from users u,friends f where u.id in (select f.user2_id from friends f,users u where f.user1_id=? and f.user2_id=u.id and f.status=1)" +
-							" or(select f.user1_id from friends f where f.user2_id=? and f.user1_id=u.id and f.status=1))) " +
-							"or (posts.user_id=? and posts.user_id = users.id) order by posts.created_at desc",
+							"select image,text,name,profile_image,posts.created_at as created_at,posts.id as post_id from posts,users where"
+									+ " (users.id=posts.user_id and users.id in"
+									+ "(select u.id as id from users u,friends f where u.id in (select f.user2_id from friends f,users u where f.user1_id=? and f.user2_id=u.id and f.status=1)"
+									+ " or(select f.user1_id from friends f where f.user2_id=? and f.user1_id=u.id and f.status=1))) "
+									+ "or (posts.user_id=? and posts.user_id = users.id) order by posts.created_at desc",
 							ResultSet.TYPE_SCROLL_INSENSITIVE);
 
 			preparedStatement.setInt(1, user_id);
@@ -552,7 +556,7 @@ public class DatabaseHandler {
 							ResultSet.TYPE_SCROLL_INSENSITIVE);
 			preparedStatement.setInt(1, id);
 			rs = preparedStatement.executeQuery();
-			System.out.println(rs.next());
+			rs.isBeforeFirst();
 			if (rs.next()) {
 				friendFeedPost = new ArrayList<FeedPost>();
 				rs.beforeFirst();
@@ -729,23 +733,25 @@ public class DatabaseHandler {
 		connect();
 		try {
 			preparedStatement = con
-					.prepareStatement("select u.* from users u, posts p where p.id = ? AND u.id = p.user_id", ResultSet.TYPE_SCROLL_INSENSITIVE);
+					.prepareStatement(
+							"select u.* from users u, posts p where p.id = ? AND u.id = p.user_id",
+							ResultSet.TYPE_SCROLL_INSENSITIVE);
 			preparedStatement.setInt(1, post_id);
 
 			ResultSet rs = preparedStatement.executeQuery();
 			rs.isBeforeFirst();
-			
+
 			System.out.println("1");
 			if (rs.next()) {
-					User user = new User();
-					user.setName(rs.getString("name"));
-					user.setEmail(rs.getString("email"));
-					user.setApi_key(rs.getString("api_key"));
-					user.setId(rs.getInt("id"));
-					user.setCreated_at(rs.getTimestamp("created_at"));
-					return user;
+				User user = new User();
+				user.setName(rs.getString("name"));
+				user.setEmail(rs.getString("email"));
+				user.setApi_key(rs.getString("api_key"));
+				user.setId(rs.getInt("id"));
+				user.setCreated_at(rs.getTimestamp("created_at"));
+				return user;
 			}
-			
+
 			System.out.println("2");
 
 		} catch (Exception e) {
@@ -756,16 +762,51 @@ public class DatabaseHandler {
 		return null;
 	}
 
-	public boolean createNotification(int user1_id, int user2_id, String message,
+	public User getUserByCommented(int user_id) {
+		connect();
+		try {
+			System.out.println(user_id);
+			preparedStatement = con.prepareStatement(
+					"select *  from users where id = ?",
+					ResultSet.TYPE_SCROLL_INSENSITIVE);
+			preparedStatement.setInt(1, user_id);
+
+			ResultSet rs = preparedStatement.executeQuery();
+			rs.isBeforeFirst();
+
+			System.out.println("1");
+			if (rs.next()) {
+				System.out.println("2");
+				User user = new User();
+				user.setName(rs.getString("name"));
+				user.setEmail(rs.getString("email"));
+				user.setApi_key(rs.getString("api_key"));
+				user.setId(rs.getInt("id"));
+				user.setCreated_at(rs.getTimestamp("created_at"));
+				System.out.print(rs.getString("name"));
+				return user;
+			}
+
+			System.out.println("3");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			closeConnection();
+		}
+		return null;
+	}
+
+	public boolean createNotification(int user_id, int post_id, String message,
 			int type, int status) {
-		
+
 		connect();
 		try {
 
 			preparedStatement = con
-					.prepareStatement("insert into notifications(user1_id, user2_id, message, type, status) values (?, ?, ?, ?, ?)");
-			preparedStatement.setInt(1, user1_id);
-			preparedStatement.setInt(2, user2_id);
+					.prepareStatement("insert into notifications(user_id, post_id,message, type, status) values (?, ?, ?, ?, ?)");
+			preparedStatement.setInt(1, user_id);
+			preparedStatement.setInt(2, post_id);
 			preparedStatement.setString(3, message);
 			preparedStatement.setInt(4, type);
 			preparedStatement.setInt(5, status);
@@ -782,5 +823,46 @@ public class DatabaseHandler {
 		}
 
 		return false;
+	}
+
+	public ArrayList<Notifications> notifications(int user_id) {
+		connect();
+		try {
+			preparedStatement = con
+					.prepareStatement("select * from posts where user_id=?");
+			preparedStatement.setInt(1, user_id);
+			ResultSet rs1 = preparedStatement.executeQuery();
+			if (rs1.next()) {
+				notification_list = new ArrayList<Notifications>();
+				preparedStatement = con
+						.prepareStatement("select u.name as username,profile_image,n.user_id as userid,n.post_id as post_id,n.message as message,n.created_at as created_at ,n.status as status from users u,notifications n where "
+								+ "n.post_id in (select id from posts where user_id=?) and n.user_id=u.id");
+				preparedStatement.setInt(1, user_id);
+				ResultSet rs = preparedStatement.executeQuery();
+				while (rs.next()) {
+					Notifications notifications = new Notifications();
+					notifications.setProfile_image(rs
+							.getString("profile_image"));
+					notifications.setFriend_name(rs.getString("username"));
+					notifications.setFriend_id(rs.getInt("userid"));
+					notifications.setMessage(rs.getString("message"));
+					notifications.setCreated_at(rs.getTimestamp("created_at"));
+					notifications.setStatus(rs.getInt("status"));
+					notifications.setPost_id(rs.getInt("post_id"));
+					notification_list.add(notifications);
+
+					System.out.println(rs.getString("username") + ","
+							+ rs.getInt("userid") + ","
+							+ rs.getString("message"));
+
+				}
+				System.out.println(notification_list);
+				return notification_list;
+			} else
+				return null;
+		} catch (Exception e) {
+
+		}
+		return null;
 	}
 }
