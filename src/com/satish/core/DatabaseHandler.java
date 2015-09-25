@@ -88,8 +88,7 @@ public class DatabaseHandler {
 					user.setApi_key(rs.getString("api_key"));
 					user.setId(rs.getInt("id"));
 					user.setCreated_at(rs.getTimestamp("created_at"));
-					// user.setImage(Config.PROFILE_IMAGE_URL+
-					// rs.getString("profile_image"));
+					user.setImage(rs.getString("profile_image"));
 
 					return user;
 				} else {
@@ -129,6 +128,7 @@ public class DatabaseHandler {
 					user.setEmail(rs.getString("email"));
 					user.setApi_key(rs.getString("api_key"));
 					user.setId(rs.getInt("id"));
+					user.setImage(rs.getString("profile_image"));
 					user.setCreated_at(rs.getTimestamp("created_at"));
 					return user;
 				} else {
@@ -472,9 +472,7 @@ public class DatabaseHandler {
 			preparedStatement.setInt(2, user_id);
 			preparedStatement.setInt(3, user_id);
 			rs = preparedStatement.executeQuery();
-			System.out.println("result" + rs);
 			if (rs.next()) {
-				System.out.println("true");
 				friendFeedPost = new ArrayList<FeedPost>();
 				rs.beforeFirst();
 				while (rs.next()) {
@@ -488,6 +486,7 @@ public class DatabaseHandler {
 					System.out.println(rs.getString("name") + "  "
 							+ rs.getTimestamp("created_at"));
 					friendFeedPost.add(friend);
+					
 				}
 				return friendFeedPost;
 			} else

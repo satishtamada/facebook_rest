@@ -64,7 +64,13 @@ public class Authentication {
 					profile.put("apikey", user.getApi_key());
 					profile.put("id", user.getId());
 					profile.put("created_at", user.getCreated_at());
-					// profile.put("profileImageUrl", user.getImage());
+					if (user.getImage()== null)
+						profile.put("profile_image",
+								Config.PROFILE_IAMGE_DEFAULT);
+					else
+						profile.put("profile_image",
+								Config.PROFILE_IMAGE_URL +user.getImage());
+					profile.put("created_at", user.getCreated_at());
 
 					response.put("profile", profile);
 
@@ -116,6 +122,12 @@ public class Authentication {
 				profile.put("email", user.getEmail());
 				profile.put("apikey", user.getApi_key());
 				profile.put("id", user.getId());
+				if (user.getImage()== null)
+					profile.put("profile_image",
+							Config.PROFILE_IAMGE_DEFAULT);
+				else
+					profile.put("profile_image",
+							Config.PROFILE_IMAGE_URL +user.getImage());
 				profile.put("created_at", user.getCreated_at());
 				response.put("profile", profile);
 
