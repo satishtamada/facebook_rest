@@ -486,7 +486,7 @@ public class DatabaseHandler {
 					System.out.println(rs.getString("name") + "  "
 							+ rs.getTimestamp("created_at"));
 					friendFeedPost.add(friend);
-					
+
 				}
 				return friendFeedPost;
 			} else
@@ -672,7 +672,7 @@ public class DatabaseHandler {
 		return null;
 	}
 
-	public boolean addFriendAccept(int user_id, int frined_id) {
+	public boolean friendRequestAccept(int user_id, int frined_id) {
 		connect();
 		try {
 			preparedStatement = con
@@ -693,7 +693,7 @@ public class DatabaseHandler {
 		return false;
 	}
 
-	public boolean addFrienddelete(int user_id, int frined_id) {
+	public boolean friendRequestDelete(int user_id, int frined_id) {
 		connect();
 		try {
 			preparedStatement = con
@@ -713,19 +713,26 @@ public class DatabaseHandler {
 		return false;
 	}
 
-	private void closeConnection() {
-		// finally block used to close resources
+	public boolean removeFriend(int user_id, int frined_id) {
+		connect();
 		try {
-			if (con != null)
-				con.close();
-		} catch (Exception se) {
-			se.printStackTrace();
-		}
-		try {
-			if (preparedStatement != null)
-				preparedStatement.close();
+			preparedStatement = con
+					.prepareStatement("delete from friends where (user1_id=? and user2_id=? and status=1)or(user2_id=? and user1_id=? and status=1)");
+			preparedStatement.setInt(1, user_id);
+			preparedStatement.setInt(2, frined_id);	
+			preparedStatement.setInt(3, user_id);
+			preparedStatement.setInt(4, frined_id);
+			int row = preparedStatement.executeUpdate();
+			if (row > 0) {
+				return true;
+			} else
+				return false;
 		} catch (Exception e) {
+
+		} finally {
+			closeConnection();
 		}
+		return false;
 	}
 
 	public User getUserByPost(int post_id) {
@@ -902,4 +909,20 @@ public class DatabaseHandler {
 		}
 		return null;
 	}
+
+	private void closeConnection() {
+		// finally block used to close resources
+		try {
+			if (con != null)
+				con.close();
+		} catch (Exception se) {
+			se.printStackTrace();
+		}
+		try {
+			if (preparedStatement != null)
+				preparedStatement.close();
+		} catch (Exception e) {
+		}
+	}
+
 }

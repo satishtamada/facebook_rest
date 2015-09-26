@@ -339,18 +339,19 @@ public class FriendsHandler {
 		}
 		return Response.status(200).entity(response.toString()).build();
 	}
-	@Path("/add_friend_confirm")
+
+	@Path("/friend_requset_confirm")
 	@POST
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	// @Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response addFriendAccept(@FormParam("user_id") int user_id,
+	public Response friendRequestConfirm(@FormParam("user_id") int user_id,
 			@FormParam("friend_id") int frined_id) {
 		JSONObject response = new JSONObject();
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			boolean success = db.addFriendAccept(user_id, frined_id);
+			boolean success = db.friendRequestAccept(user_id, frined_id);
 			if (success) {
 				response.put("success", true);
 				response.put("message", "your accept success");
@@ -365,19 +366,21 @@ public class FriendsHandler {
 		} catch (Exception e) {
 		}
 		return Response.status(200).entity(response.toString()).build();
-	
-	}@Path("/add_friend_delete")
+
+	}
+
+	@Path("/friend_request_delete")
 	@POST
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	// @Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response addFriendDelete(@FormParam("user_id") int user_id,
+	public Response friendRequestDelete(@FormParam("user_id") int user_id,
 			@FormParam("friend_id") int frined_id) {
 		JSONObject response = new JSONObject();
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			boolean success = db.addFrienddelete(user_id, frined_id);
+			boolean success = db.friendRequestDelete(user_id, frined_id);
 			if (success) {
 				response.put("success", true);
 				response.put("message", "your request deleted");
@@ -394,6 +397,34 @@ public class FriendsHandler {
 		return Response.status(200).entity(response.toString()).build();
 	}
 
+	@Path("/remove_friend")
+	@POST
+	@Produces("application/json")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	// @Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response removeFriend(@FormParam("user_id") int user_id,
+			@FormParam("friend_id") int frined_id) {
+		JSONObject response = new JSONObject();
+		try {
+			// connecting database
+			DatabaseHandler db = new DatabaseHandler();
+			boolean success = db.removeFriend(user_id, frined_id);
+			if (success) {
+				response.put("success", true);
+				response.put("message", "friend removed");
+			} else {
+				response.put("success", false);
+				JSONObject error = new JSONObject();
+				error.put("code", Config.ERROR_FRIEND_EXISTED);
+				error.putOpt("message", "fail to remove friend");
+				response.put("error", error);
+			}
+
+		} catch (Exception e) {
+		}
+		return Response.status(200).entity(response.toString()).build();
+	}
+
 	@Path("/friend_requests")
 	@GET
 	@Produces("application/json")
@@ -402,14 +433,14 @@ public class FriendsHandler {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd hh:mm:ss");
 		Calendar calendar = Calendar.getInstance();
 		JsonObject response = new JsonObject();
-        ArrayList<Friend> friends;
+		ArrayList<Friend> friends;
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
 			friends = db.friendRequests(id);
 			JsonArray friendArray = new JsonArray();
-			if (friends!= null) {
-				response.addProperty("success",true);
+			if (friends != null) {
+				response.addProperty("success", true);
 				for (int i = 0; i < friends.size(); i++) {
 					Friend f = friends.get(i);
 					// adding elements to json object
@@ -427,9 +458,9 @@ public class FriendsHandler {
 				response.add("friends", friendArray);
 			} else {
 				response.addProperty("success", true);
-				response.add("friends",friendArray);
+				response.add("friends", friendArray);
 			}
-			
+
 		} catch (Exception e) {
 		}
 		return Response.status(200).entity(response.toString()).build();
