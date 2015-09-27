@@ -719,7 +719,7 @@ public class DatabaseHandler {
 			preparedStatement = con
 					.prepareStatement("delete from friends where (user1_id=? and user2_id=? and status=1)or(user2_id=? and user1_id=? and status=1)");
 			preparedStatement.setInt(1, user_id);
-			preparedStatement.setInt(2, frined_id);	
+			preparedStatement.setInt(2, frined_id);
 			preparedStatement.setInt(3, user_id);
 			preparedStatement.setInt(4, frined_id);
 			int row = preparedStatement.executeUpdate();
@@ -830,18 +830,46 @@ public class DatabaseHandler {
 
 		return false;
 	}
+	public boolean createNotificationRequestAccept(int user_id, int friend_id, String message,
+			int type, int status) {
+
+		connect();
+		try {
+
+			preparedStatement = con
+					.prepareStatement("insert into notifications(user_id, friend_id,message, type, status) values (?, ?, ?, ?, ?)");
+			preparedStatement.setInt(1, user_id);
+			preparedStatement.setInt(2, friend_id);
+			preparedStatement.setString(3, message);
+			preparedStatement.setInt(4, type);
+			preparedStatement.setInt(5, status);
+			int row = preparedStatement.executeUpdate();
+
+			if (row > 0) {
+				return true;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			closeConnection();
+		}
+
+		return false;
+	}
 
 	public ArrayList<Notifications> notifications(int user_id) {
 		connect();
 		try {
+			notification_list = new ArrayList<Notifications>();
 			preparedStatement = con
 					.prepareStatement("select * from posts where user_id=?");
 			preparedStatement.setInt(1, user_id);
 			ResultSet rs1 = preparedStatement.executeQuery();
 			if (rs1.next()) {
-				notification_list = new ArrayList<Notifications>();
 				preparedStatement = con
-						.prepareStatement("select u.name as username,profile_image,n.user_id as userid,n.post_id as post_id,n.message as message,n.created_at as created_at ,n.status as status from users u,notifications n where "
+						.prepareStatement("select u.name as username,profile_image,n.user_id as userid,n.post_id as post_id,n.message as message,n.created_at as created_at ,n.status as status" +
+								" from users u,notifications n where "
 								+ "n.post_id in (select id from posts where user_id=?) and n.user_id=u.id order by created_at desc");
 				preparedStatement.setInt(1, user_id);
 				ResultSet rs = preparedStatement.executeQuery();
@@ -856,7 +884,6 @@ public class DatabaseHandler {
 					notifications.setStatus(rs.getInt("status"));
 					notifications.setPost_id(rs.getInt("post_id"));
 					notification_list.add(notifications);
-
 					System.out.println(rs.getString("username") + ","
 							+ rs.getInt("userid") + ","
 							+ rs.getString("message"));
@@ -923,6 +950,85 @@ public class DatabaseHandler {
 				preparedStatement.close();
 		} catch (Exception e) {
 		}
+	}
+
+	public User getUserByFriendId(int friend_id) {
+		connect();
+		try{
+			preparedStatement = con.prepareStatement(
+					"select *  from users where id = ?",
+					ResultSet.TYPE_SCROLL_INSENSITIVE);
+			preparedStatement.setInt(1, friend_id);
+
+			ResultSet rs = preparedStatement.executeQuery();
+			rs.isBeforeFirst();
+			if (rs.next()) {
+				User user = new User();
+				user.setName(rs.getString("name"));
+				user.setEmail(rs.getString("email"));
+				user.setApi_key(rs.getString("api_key"));
+				user.setId(rs.getInt("id"));
+				user.setCreated_at(rs.getTimestamp("created_at"));
+				return user;
+			}
+	
+		}catch(Exception e){
+			
+		}finally{
+			closeConnection();
+		}
+		return null;
+		
+	}
+
+	public User getUserByUserId(int user_id)  {
+		connect();
+		try{
+			preparedStatement = con.prepareStatement(
+					"select *  from users where id = ?",
+					ResultSet.TYPE_SCROLL_INSENSITIVE);
+			preparedStatement.setInt(1, user_id);
+
+			ResultSet rs = preparedStatement.executeQuery();
+			rs.isBeforeFirst();
+			if (rs.next()) {
+				User user = new User();
+				user.setName(rs.getString("name"));
+				user.setEmail(rs.getString("email"));
+				user.setApi_key(rs.getString("api_key"));
+				user.setId(rs.getInt("id"));
+				user.setCreated_at(rs.getTimestamp("created_at"));
+				return user;
+			}
+	
+		}catch(Exception e){
+			
+		}finally{
+			closeConnection();
+		}
+		return null;
+		
+	}
+
+	public boolean likeCreate(int user1_id, int post_id, int like_status) {
+		connect();
+		try {
+			preparedStatement = con
+					.prepareStatement("insert into likes(user_id, post_id, like_status) values(?,?,?)");
+			preparedStatement.setInt(1, user1_id);
+			preparedStatement.setInt(2, post_id);
+			preparedStatement.setInt(3, like_status);
+			int row = preparedStatement.executeUpdate();
+
+			if (row > 0)
+				return true;
+			else
+				return false;
+		} catch (Exception e) {
+		} finally {
+			closeConnection();
+		}
+		return false;
 	}
 
 }

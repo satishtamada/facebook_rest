@@ -23,6 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.satish.core.DatabaseHandler;
 import com.satish.global.Config;
+import com.satish.helper.Parse;
 import com.satish.model.Comments;
 import com.satish.model.FeedPost;
 import com.satish.model.Friend;
@@ -340,21 +341,60 @@ public class FriendsHandler {
 		return Response.status(200).entity(response.toString()).build();
 	}
 
-	@Path("/friend_requset_confirm")
+	@Path("/friend_request_confirm")
 	@POST
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	// @Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response friendRequestConfirm(@FormParam("user_id") int user_id,
-			@FormParam("friend_id") int frined_id) {
+			@FormParam("friend_id") int friend_id) {
 		JSONObject response = new JSONObject();
 		try {
 			// connecting database
 			DatabaseHandler db = new DatabaseHandler();
-			boolean success = db.friendRequestAccept(user_id, frined_id);
+			boolean success = db.friendRequestAccept(user_id, friend_id);
 			if (success) {
 				response.put("success", true);
 				response.put("message", "your accept success");
+
+				// get friend
+				User friend = db.getUserByFriendId(friend_id);
+				System.out.println(friend.getEmail());
+				// get post owner
+				User user = db.getUserByUserId(user_id);
+                System.out.println(user.getName());
+				if (user != null) {
+                    
+					// create notification row
+					String message = Config.PUSH_MESSAGE_FRIEND_REQUEST_ACCEPT
+							.replace("#name#", user.getName());
+					String db_message = Config.DB_MESSAGE_FRIEND_REQUEST_ACCEPT
+							.replace("#name#", user.getName());
+					boolean notification = db.createNotificationRequestAccept(user_id,
+							friend_id, db_message,
+							Config.FRIEND_REQUEST_ACCEPT, 0);
+
+					if (notification) {
+						// send push notification
+						JSONObject jObj = new JSONObject();
+						jObj.put("flag", 3);
+						jObj.put("is_background", false);
+
+						JSONObject jData = new JSONObject();
+						jData.put("message", message);
+						jData.put("title", "Friend Request Accepted");
+						jObj.put("data", jData);
+
+						System.out.println("push: " + jObj.toString());
+
+						Parse parse = new Parse();
+						// parse.sendPush(json);
+						parse.sendPushNotification(friend.getEmail(),
+								jObj.toString());
+					} else {
+						System.out.println("Failed to store notification");
+					}
+				}
 			} else {
 				response.put("success", false);
 				JSONObject error = new JSONObject();

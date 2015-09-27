@@ -8,11 +8,15 @@ public class Config {
 	public static final int ERROR_NO_COMMENTS=103;
 	public static final int ERROR_FRIEND_EXISTED=104;
 	public static final int ERROR_NO_NOTIFICATIONS=105;
-	public static final String URL="http://192.168.0.102:8080/facebook_rest/";
+	public static final String URL="http://192.168.0.103:8080/facebook_rest/";
 	public static final String IMAGE_SOURCE_FILE=URL+"images/";
 	public static final String PROFILE_IMAGE_URL=URL+"images/profileImages/";
 	public static final String PROFILE_IAMGE_DEFAULT=URL+"images/profileImages/profile_selected.jpg";
+	//notification status in db
 	public static final int NOTIFICATION_COMMENT = 1;
+	public static final int NOTIFICATION_LIKE=2;
+	public static final int FRIEND_REQUEST_ACCEPT=3;
+	
 	
 	
 	//Parse config
@@ -21,4 +25,10 @@ public class Config {
 	
 	public static final String DB_MESSAGE_NEW_COMMENT="<b> #name#</b> has commented on your post. \"#comment# ...\"";
 	public static final String PUSH_MESSAGE_NEW_COMMENT = "#name# has commented on your post. \"#comment# ...\"";
+	
+	public static final String DB_MESSAGE_NEW_LIKE="<b>#name#</b> likes your post";
+	public static final String PUSH_MESSAGE_NEW_LIKE="#name# likes your post";
+	
+	public static final String DB_MESSAGE_FRIEND_REQUEST_ACCEPT="<b>#name#</b> has accepted your friend request";
+	public static final String PUSH_MESSAGE_FRIEND_REQUEST_ACCEPT="#name# has accepted your friend request";
 }
