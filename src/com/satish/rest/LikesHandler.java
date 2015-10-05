@@ -22,7 +22,7 @@ public class LikesHandler {
 	@POST
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response loginUser(@FormParam("user_id") int user1_id,
+	public Response likeCreate(@FormParam("user_id") int user1_id,
 			@FormParam("post_id") int post_id,@FormParam("like_status") int like_status) {
 		JsonObject response = new JsonObject();
 		boolean like_post;
@@ -50,7 +50,7 @@ public class LikesHandler {
 					if(notification){
 						// send push notification
 						JSONObject jObj = new JSONObject();
-						jObj.put("flag", 3);
+						jObj.put("flag", 2);
 						jObj.put("is_background", false);
 						
 						JSONObject jData = new JSONObject();
@@ -70,6 +70,33 @@ public class LikesHandler {
 					}
 				}
 				
+				
+			}else {
+				response.addProperty("success", false);
+				JSONObject error = new JSONObject();
+				error.put("code", Config.ERROR_UNKNOWN);
+				error.putOpt("message",
+						"Server busy....!");
+				response.addProperty("error", error.toString());
+			}
+		} catch (Exception e) {
+		}
+		return Response.status(200).entity(response.toString()).build();
+	}
+	@Path("/remove")
+	@POST
+	@Produces("application/json")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response likeRemove(@FormParam("user_id") int user1_id,
+			@FormParam("post_id") int post_id) {
+		JsonObject response = new JsonObject();
+		boolean like_remove;
+		try {
+			DatabaseHandler db = new DatabaseHandler();
+			like_remove= db.disLike(user1_id, post_id);
+			if (like_remove) {
+				response.addProperty("success", true);
+				response.add("error",null);
 				
 			}else {
 				response.addProperty("success", false);

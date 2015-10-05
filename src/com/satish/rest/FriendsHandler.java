@@ -8,6 +8,7 @@ import java.util.Date;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -246,7 +247,11 @@ public class FriendsHandler {
 	@GET
 	@Produces("application/json")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response frinedPosts(@QueryParam("id") int id) {
+	public Response frinedPosts(@HeaderParam("Authorization") String apikey, @QueryParam("id") int id) {
+		System.out.println("Apikey: " + apikey);
+		
+		
+		
 		Gson gson = new Gson();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd hh:mm:ss");
 		Calendar calendar = Calendar.getInstance();
@@ -297,6 +302,8 @@ public class FriendsHandler {
 					Date date = sdf.parse(f.getCreated_at().toString());
 					calendar.setTime(date);
 					cObj.addProperty("created_at", calendar.getTimeInMillis());
+					int like=db.likeStatus(f.getPost_id());
+					cObj.addProperty("like_status", like);
 					friends.add(cObj);
 				}
 				response.add("posts", friends);

@@ -1,6 +1,8 @@
 package com.satish.rest;
 
 
+import java.util.ArrayList;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -14,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.satish.core.DatabaseHandler;
 import com.satish.global.Config;
 import com.satish.helper.Parse;
+import com.satish.model.Comments;
 import com.satish.model.User;
 
 @Path("/comment")
@@ -25,15 +28,17 @@ public class CommentsHandler {
 	public Response loginUser(@FormParam("user1_id") int user1_id,
 			@FormParam("post_id") int post_id,@FormParam("comment") String comment) {
 		JsonObject response = new JsonObject();
+		ArrayList<Comments> comment_list;
 		boolean comment_post;
-		try {
+		try {		
 			DatabaseHandler db = new DatabaseHandler();
 			comment_post= db.commentCreate(user1_id, post_id,comment);
+			comment_list = db.comment(post_id);
 			if (comment_post) {
 				response.addProperty("success", true);
 				response.add("error",null);
-				
-				System.out.println("user by post:x ");
+				response.addProperty("comments_count", comment_list.size());
+				System.out.println(comment_list.size());
 				
 				
 				// get post owner

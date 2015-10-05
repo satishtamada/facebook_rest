@@ -155,6 +155,11 @@ public class FeedHandler {
 				response.addProperty("user_name", feedPost.getUsername());
 				response.addProperty("image", Config.IMAGE_SOURCE_FILE+feedPost.getImage());
 				response.addProperty("text", feedPost.getText());
+				if (comment_list != null) 
+					response.addProperty("comments_count", comment_list.size());
+				else
+					response.addProperty("comments_count", 0);
+				
 				if (feedPost.getProfile_image() == null)
 					response.addProperty("profile_image",
 							Config.PROFILE_IAMGE_DEFAULT);

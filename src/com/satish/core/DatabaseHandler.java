@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import javax.security.auth.login.AppConfigurationEntry;
+
 import com.satish.global.Config;
 import com.satish.helper.PasswordUtils;
 import com.satish.model.Comments;
@@ -20,8 +22,6 @@ import com.satish.model.User;
 public class DatabaseHandler {
 	private String DRIVER = "com.mysql.jdbc.Driver";
 	private String CONNECTION_URL = "jdbc:mysql://localhost:3306/facebook";
-	private String USERNAME = "root";
-	private String PASSWORD = "root";
 	private ArrayList<Comments> comment_list;
 	private ArrayList<Friend> friend_list;
 	private ArrayList<FeedPost> friendFeedPost;
@@ -38,8 +38,8 @@ public class DatabaseHandler {
 
 		try {
 			Class.forName(DRIVER);
-			con = DriverManager.getConnection(CONNECTION_URL, USERNAME,
-					PASSWORD);
+			con = DriverManager.getConnection(CONNECTION_URL, Config.MYSQL_USER_NAME,
+					Config.MYSQL_USER_PASSWORD);
 
 			return true;
 		} catch (SQLException e) {
@@ -1029,6 +1029,47 @@ public class DatabaseHandler {
 			closeConnection();
 		}
 		return false;
+	}
+	public boolean disLike(int user1_id, int post_id) {
+		connect();
+		try {
+			preparedStatement = con
+					.prepareStatement("update likes set like_status=0 where user_id=? and  post_id=?");
+			preparedStatement.setInt(1, user1_id);
+			preparedStatement.setInt(2, post_id);
+			int row = preparedStatement.executeUpdate();
+			if (row > 0)
+				return true;
+			else
+				return false;
+		} catch (Exception e) {
+		} finally {
+			closeConnection();
+		}
+		return false;
+	}
+
+	public int likeStatus(int post_id) {
+		connect();
+		try {
+			System.out.println(post_id);
+			preparedStatement = con.prepareStatement(
+					"select *  from likes where post_id = ?",
+					ResultSet.TYPE_SCROLL_INSENSITIVE);
+			preparedStatement.setInt(1, post_id);
+			ResultSet rs = preparedStatement.executeQuery();
+			rs.isBeforeFirst();
+			System.out.println("1");
+			if (rs.next()) {
+				return rs.getInt("like_status");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			closeConnection();
+		}
+		return 0;
 	}
 
 }
